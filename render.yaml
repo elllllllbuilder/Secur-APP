@@ -21,6 +21,8 @@ services:
           property: connectionString
       - key: JWT_SECRET
         generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
       - key: MERCADOPAGO_ACCESS_TOKEN
         sync: false
       - key: FRONTEND_URL
