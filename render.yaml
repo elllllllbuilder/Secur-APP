@@ -5,8 +5,8 @@ services:
     runtime: node
     region: oregon
     plan: free
-    buildCommand: cd backend && npm ci && npx prisma generate && npx nest build
-    startCommand: cd backend && node dist/main.js
+    buildCommand: cd backend && npm ci && npx prisma generate && npx nest build && echo "=== Build complete, checking dist ===" && ls -la && ls -la dist || echo "dist folder not found"
+    startCommand: cd backend && pwd && ls -la && ls -la dist && node dist/main.js
     envVars:
       - key: NODE_ENV
         value: production
