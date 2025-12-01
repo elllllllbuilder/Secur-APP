@@ -1,0 +1,173 @@
+# ===================================
+# GITIGNORE - Secur APP / UFAe
+# ===================================
+
+# ===== NODE MODULES =====
+node_modules/
+**/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# ===== ENVIRONMENT VARIABLES =====
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+**/.env
+**/.env.local
+
+# ===== BACKEND =====
+backend/dist/
+backend/build/
+backend/.env
+backend/.env.local
+backend/uploads/*
+!backend/uploads/.gitkeep
+backend/node_modules/
+backend/.nest/
+backend/*.log
+
+# ===== FRONTEND (React Native / Expo) =====
+frontend/node_modules/
+frontend/.expo/
+frontend/.expo-shared/
+frontend/dist/
+frontend/web-build/
+frontend/.env
+frontend/.env.local
+frontend/android/
+frontend/ios/
+frontend/*.jks
+frontend/*.p8
+frontend/*.p12
+frontend/*.key
+frontend/*.mobileprovision
+frontend/*.orig.*
+
+# ===== DASHBOARD =====
+doc-review-dashboard/node_modules/
+doc-review-dashboard/dist/
+doc-review-dashboard/.env
+doc-review-dashboard/.env.local
+doc-review-dashboard/build/
+
+# ===== MOBILE =====
+mobile/node_modules/
+mobile/.expo/
+mobile/.expo-shared/
+mobile/dist/
+mobile/web-build/
+mobile/.env
+mobile/.env.local
+
+# ===== DATABASE =====
+*.db
+*.sqlite
+*.sqlite3
+prisma/dev.db
+prisma/dev.db-journal
+
+# ===== LOGS =====
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ===== OS =====
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# ===== IDE =====
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+*.sublime-project
+
+# ===== TYPESCRIPT =====
+*.tsbuildinfo
+.tsbuildinfo
+
+# ===== TESTING =====
+coverage/
+.nyc_output/
+*.lcov
+.coverage
+htmlcov/
+.pytest_cache/
+.cache/
+
+# ===== BUILD =====
+dist/
+build/
+out/
+.next/
+.nuxt/
+.cache/
+.parcel-cache/
+
+# ===== TEMPORARY =====
+tmp/
+temp/
+*.tmp
+*.temp
+.tmp/
+
+# ===== CREDENTIALS (IMPORTANTE!) =====
+*.pem
+*.key
+*.cert
+*.crt
+*.p12
+*.jks
+*.keystore
+credentials.json
+service-account.json
+CREDENCIAIS_ADMIN.txt
+
+# ===== MERCADO PAGO / PAYMENT =====
+mercadopago-credentials.json
+payment-keys.json
+
+# ===== BACKUP =====
+*.backup
+*.bak
+*.old
+*-old.*
+*-backup.*
+
+# ===== COMPRESSED =====
+*.zip
+*.tar
+*.tar.gz
+*.rar
+*.7z
+
+# ===== MISC =====
+.vercel
+.netlify
+.railway
+*.local
+.pnp
+.pnp.js
+.yarn/install-state.gz

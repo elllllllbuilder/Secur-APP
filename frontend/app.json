@@ -1,0 +1,48 @@
+{
+  "expo": {
+    "name": "Secur APP",
+    "slug": "secur-app",
+    "scheme": "securapp",
+    "owner": "secur",
+    "orientation": "portrait",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#6d28d9"
+    },
+    "android": {
+      "package": "com.secur.app",
+      "config": {
+        "googleMaps": {
+          "apiKey": "YOUR_GOOGLE_MAPS_API_KEY"
+        }
+      },
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ]
+    },
+    "ios": {
+      "bundleIdentifier": "com.secur.app",
+      "config": {
+        "googleMapsApiKey": "YOUR_GOOGLE_MAPS_API_KEY"
+      },
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Precisamos da sua localização para mostrar postos de gasolina próximos"
+      }
+    },
+    "plugins": [
+      "expo-secure-store",
+      [
+        "expo-notifications",
+        {
+          "color": "#00a9ff"
+        }
+      ]
+    ],
+    "notification": {
+      "color": "#00a9ff",
+      "androidMode": "default",
+      "androidCollapsedTitle": "Secur APP"
+    }
+  }
+}

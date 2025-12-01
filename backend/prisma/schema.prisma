@@ -1,0 +1,352 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  // directUrl = env("DATABASE_URL_UNPOOLED") // se precisar
+}
+
+// ========== Enums ==========
+enum PlanTier {
+  BRONZE
+  PRATA
+  OURO
+}
+
+enum SubStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  INCOMPLETE
+}
+
+enum CaseType {
+  SAUDE
+  PANE_MECANICA
+  ACIDENTE
+  ROUBO_FURTO
+}
+
+enum CaseStatus {
+  APROVADA
+  EM_ANALISE
+  REPROVADO
+}
+
+enum PayoutStatus {
+  EM_ANALISE
+  AGENDANDO
+  ENVIADO
+}
+
+// ========== Modelos ==========
+model User {
+  id           String         @id @default(cuid())
+  name         String
+  email        String         @unique
+  phone        String?
+  cpf          String         @unique
+  passwordHash String
+  photoUrl     String?
+  role         String         @default("member")
+  categoryId   String?
+  category     Category?      @relation(fields: [categoryId], references: [id])
+  
+  // Push Notifications
+  pushToken    String?        // Token do Expo para push notifications
+  
+  // --- CORREÇÃO AQUI ---
+  // Adicionados campos de endereço para o checkout de boleto.
+  street       String?
+  number       String?
+  city         String?
+  state        String?
+  zipCode      String?
+  // --- FIM DA CORREÇÃO ---
+
+  subscriptions Subscription[]
+  documents    UserDocument[]
+  supportCases SupportCase[]
+  payments     Payment[]
+  notifications Notification[]
+  supportTickets SupportTicket[]
+  ticketMessages TicketMessage[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@index([categoryId])
+  @@index([pushToken])
+}
+
+model Category {
+  id           String        @id @default(cuid())
+  slug         String        @unique
+  title        String
+  description  String
+  requiredDocs RequiredDoc[]
+
+  users     User[]
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+}
+
+model RequiredDoc {
+  id         String  @id @default(cuid())
+  categoryId String
+  code       String
+  label      String
+  isOptional Boolean @default(false)
+
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@index([categoryId])
+  @@index([code])
+}
+
+model Plan {
+  id                    String   @id @default(cuid())
+  tier                  PlanTier
+  priceCents            Int
+  currency              String   @default("BRL")
+  active                Boolean  @default(true)
+  paymentProviderPlanId String?
+  displayName           String?
+
+  subscriptions Subscription[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@index([tier])
+  @@index([active])
+}
+
+model Subscription {
+  id               String    @id @default(cuid())
+  userId           String
+  planId           String
+  status           SubStatus @default(ACTIVE)
+  provider         String?
+  providerSubId    String?
+  startedAt        DateTime  @default(now())
+  currentPeriodEnd DateTime?
+  graceEndsAt      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan     Plan      @relation(fields: [planId], references: [id])
+  payments Payment[]
+
+  @@index([userId])
+  @@index([planId])
+  @@index([status])
+}
+
+model Payment {
+  id             String        @id @default(cuid())
+  userId         String
+  subscriptionId String?
+  method         String
+  provider       String
+  providerId     String?
+  status         String
+  amountCents    Int
+  barcode        String?
+  boletoUrl      String?
+  qrCode         String?
+  qrCodeText     String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  subscription Subscription? @relation(fields: [subscriptionId], references: [id])
+  user         User          @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([subscriptionId])
+  @@index([providerId])
+  @@index([status])
+}
+
+model UserDocument {
+  id           String   @id @default(cuid())
+  userId       String
+  code         String
+  url          String
+  mime         String
+  originalName String?
+  verified     Boolean  @default(false)
+  uploadedAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([code])
+  @@index([verified])
+}
+
+model SupportCase {
+  id          String      @id @default(cuid())
+  userId      String
+  type        CaseType
+  description String?
+  status      CaseStatus  @default(EM_ANALISE)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  user        User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  attachments SupportAttachment[]
+  approval    ApprovalInfo?
+
+  @@index([userId])
+  @@index([type])
+  @@index([status])
+}
+
+model SupportAttachment {
+  id            String      @id @default(cuid())
+  supportCaseId String
+  code          String?
+  url           String
+  mime          String
+  uploadedAt    DateTime    @default(now())
+
+  supportCase SupportCase @relation(fields: [supportCaseId], references: [id], onDelete: Cascade)
+
+  @@index([supportCaseId])
+  @@index([code])
+}
+
+model ApprovalInfo {
+  id            String       @id @default(cuid())
+  supportCaseId String       @unique
+  amountCents   Int
+  payoutStatus  PayoutStatus @default(EM_ANALISE)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  supportCase SupportCase @relation(fields: [supportCaseId], references: [id], onDelete: Cascade)
+}
+
+model Term {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  title     String
+  contentMd String
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model GasStation {
+  id                  String          @id @default(cuid())
+  name                String
+  latitude            Float
+  longitude           Float
+  address             String?
+  hasElectricCharger  Boolean         @default(false)
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+  
+  fuelPrices          FuelPrice[]
+  reports             StationReport[]
+
+  @@index([latitude, longitude])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String   // expiration_warning_10d, expiration_warning_5d, etc
+  title     String
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([type])
+  @@index([read])
+  @@index([createdAt])
+}
+
+model FuelPrice {
+  id            String      @id @default(cuid())
+  gasStationId  String
+  fuelType      String      // GASOLINA, ETANOL, DIESEL, GNV
+  price         Float
+  reportedAt    DateTime    @default(now())
+  reportedBy    String?     // IP ou user ID (opcional)
+  
+  gasStation    GasStation  @relation(fields: [gasStationId], references: [id], onDelete: Cascade)
+
+  @@index([gasStationId])
+  @@index([reportedAt])
+}
+
+model StationReport {
+  id            String      @id @default(cuid())
+  gasStationId  String
+  reportType    String      // CLOSED, WRONG_LOCATION, DUPLICATE, OTHER
+  comment       String?
+  reportedAt    DateTime    @default(now())
+  
+  gasStation    GasStation  @relation(fields: [gasStationId], references: [id], onDelete: Cascade)
+
+  @@index([gasStationId])
+}
+
+model SupportTicket {
+  id          String   @id @default(cuid())
+  userId      String
+  type        String   // health, breakdown, accident, theft
+  status      String   @default("open") // open, in_progress, resolved, closed
+  priority    String   @default("normal") // low, normal, high, urgent
+  title       String
+  description String   @db.Text
+  location    String?
+  latitude    Float?
+  longitude   Float?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  resolvedAt  DateTime?
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages    TicketMessage[]
+
+  @@index([userId])
+  @@index([type])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model TicketMessage {
+  id          String   @id @default(cuid())
+  ticketId    String
+  userId      String
+  message     String?  @db.Text
+  attachments Json?    // Array de URLs de anexos
+  isAdmin     Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  
+  ticket      SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model Banner {
+  id        Int      @id @default(autoincrement())
+  imageUrl  String
+  order     Int      @default(0)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([order])
+  @@index([active])
+}
